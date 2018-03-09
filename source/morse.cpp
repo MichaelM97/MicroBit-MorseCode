@@ -78,7 +78,7 @@ char MorseClass::decrypt(char letter) {
           returnVar = '0';
           break;
         default:
-          mapItr = prev(mapItr, 3)
+          mapItr = prev(mapItr, 3);
           returnVar = mapItr->second;
       }
     break;

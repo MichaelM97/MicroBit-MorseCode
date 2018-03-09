@@ -34,6 +34,7 @@ MicroBitImage DASH_IMAGE("0,0,0,0,0\n0,0,0,0,0\n0,255,255,255,0\n0,0,0,0,0\n0,0,
 MicroBitButton buttonA(MICROBIT_PIN_BUTTON_A, MICROBIT_ID_BUTTON_A);
 
 //Pin events
+//MicroBitPin P0(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ALL);
 MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
 
 int main()
@@ -46,15 +47,16 @@ int main()
 
     //Variables
     bool buttonPressed = false, incomingSignal = false;
-    uint64_t runningTime, durationPressed, waiting = 0;
+    uint64_t buttonTime, buttonDuration, buttonWaiting = 0,
+      signalTime, signalDuration, signalWaiting = 0;
     string transmissionBuffer;
     char letter;
 
     //Main infinite loop
     while (1) {
 
-      //Update system up time
-      runningTime = uBit.systemTime();
+      //Update button up time
+      buttonTime = uBit.systemTime();
 
       /** HANDLE MORSE TRANSMISSION **/
       //Wait for button input
@@ -63,39 +65,39 @@ int main()
       }
 
       //Get the button input duration
-      durationPressed = uBit.systemTime() - runningTime;
+      buttonDuration = uBit.systemTime() - buttonTime;
 
       //Process button press
       if (buttonPressed == true) {
         //DOT Output
-        if ((durationPressed > 100) && (durationPressed < 400)) {
+        if ((buttonDuration > 100) && (buttonDuration < 400)) {
           uBit.display.printAsync(DOT_IMAGE);
           transmissionBuffer += '.';
           uBit.sleep(700);
           uBit.display.clear();
         }
         //DASH output
-        else if ((durationPressed > 400) && (durationPressed < 800)) {
+        else if ((buttonDuration > 400) && (buttonDuration < 800)) {
           uBit.display.printAsync(DASH_IMAGE);
           transmissionBuffer += '-';
           uBit.sleep(700);
           uBit.display.clear();
         }
         //NOISE
-        else if (durationPressed > 800) {
+        else if (buttonDuration > 800) {
           uBit.display.printAsync("!");
           uBit.sleep(700);
           uBit.display.clear();
         }
         //Reset variables to allow for new inputs
         buttonPressed = false;
-        waiting = uBit.systemTime();
+        buttonWaiting = uBit.systemTime();
         //Update system up time
-        runningTime = uBit.systemTime();
+        buttonTime = uBit.systemTime();
       }
 
       //Input is finished if wait time met
-      if (((runningTime - waiting) > 2000) && (waiting != 0)) {
+      if (((buttonTime - buttonWaiting) > 2000) && (buttonWaiting != 0)) {
         //Get letter associated with morse input
         letter = morse->getLetter(transmissionBuffer);
         if (letter != '?') { //Only if valid morse found
@@ -115,43 +117,46 @@ int main()
         }
         //Reset variables to allow for new transmissions
         transmissionBuffer.clear();
-        waiting = 0;
+        buttonWaiting = 0;
       }
 
       /** HANDLE INCOMING MORSE **/
+      //Update signal up time
+      signalTime = uBit.systemTime();
+
       //Wait for signal from Pin 1
       while (P1.getDigitalValue() == 1) {
         incomingSignal = true;
       }
 
       //Get the incoming signal duration
-      durationPressed = uBit.systemTime() - runningTime;
+      signalDuration = uBit.systemTime() - signalTime;
 
       //Process incoming signal
       if (incomingSignal == true) {
         //DOT input
-        if ((durationPressed > 100) && (durationPressed < 400)) {
+        if ((signalDuration > 100) && (signalDuration < 400)) {
           transmissionBuffer += '.';
         }
         //DASH input
-        else if ((durationPressed > 400) && (durationPressed < 800)) {
+        else if ((signalDuration > 400) && (signalDuration < 800)) {
           transmissionBuffer += '-';
         }
         //NOISE
-        else if (durationPressed > 800) {
+        else if (signalDuration > 800) {
           uBit.display.printAsync("!");
           uBit.sleep(700);
           uBit.display.clear();
         }
         //Reset variables to allow for new incoming signals
         incomingSignal = false;
-        waiting = uBit.systemTime();
+        signalWaiting = uBit.systemTime();
         //Update system up time
-        runningTime = uBit.systemTime();
+        signalTime = uBit.systemTime();
       }
 
       //Incoming signal is finished if wait time met
-      if (((runningTime - waiting) > 2000) && (waiting != 0)) {
+      if (((signalTime - signalWaiting) > 2000) && (signalWaiting != 0)) {
         //Get letter associated with morse signal
         letter = morse->getLetter(transmissionBuffer);
         if (letter != '?') { //Only if valid morse found
@@ -164,7 +169,7 @@ int main()
         uBit.display.clear();
         //Reset variables to allow for new transmissions
         transmissionBuffer.clear();
-        waiting = 0;
+        signalWaiting = 0;
       }
 
     }
