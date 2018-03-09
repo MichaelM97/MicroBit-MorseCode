@@ -42,11 +42,11 @@ Wait for a moment - A '>' symbol should appear, and the letter 'A will appear on
 ![alt text](https://upload.wikimedia.org/wikipedia/commons/b/b5/International_Morse_Code.svg)
 ### 3. Whilst using the protocol, you will see some symbols appear. Below is a description of what each one means:
 ```
-**.** - You have just entered a Dot
-**-** - You have just entered a Dash
-**!** - You held the button for too long (or your MicroBit button/pin input is recieving noise)
-**>** - Your message has been sent
-**?** - You have entered an invalid morse sequence
+. - You have just entered a Dot
+- - You have just entered a Dash
+! - You held the button for too long (or your MicroBit button/pin input is recieving noise)
+> - Your message has been sent
+? - You have entered an invalid morse sequence
 ```
 
 ## Brief description of the Caeser cipher
