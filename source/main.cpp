@@ -1,17 +1,27 @@
 /**
  * File: main.cpp
  * Author: Michael McCormick
- * Date: 08-03-2018
+ * Date: 09-03-2018
  * Desc: Basic transmission/recieving protocol for morse code sent across 2
  * microbits connected via wires. Implements a basic encryption cypher.
  * Copyright: University of West of England 2018
  */
 #include "MicroBit.h"
-//#include "reciever.h"
+#include "morse.h"
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <string>
+
+//Timings used for distinguishing between dot/dash transmissions
+#define DOT_TIME 250
+#define DASH_TIME 500
+
+using namespace std;
+
+/* Sends the passed morse code transmission (not in morse class as there
+were issues with handling pin events) */
+void sendTransmission(string transmissionBuffer);
 
 //Used to access microbit
 MicroBit uBit;
@@ -24,23 +34,21 @@ MicroBitImage DASH_IMAGE("0,0,0,0,0\n0,0,0,0,0\n0,255,255,255,0\n0,0,0,0,0\n0,0,
 MicroBitButton buttonA(MICROBIT_PIN_BUTTON_A, MICROBIT_ID_BUTTON_A);
 
 //Pin events
-MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
-
-//Timings used for distinguishing between dot/dash transmissions
-static const int DOT_TIME = 250;
-static const int DASH_TIME = 500;
+MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
 
 int main()
 {
     //Initialise the micro:bit runtime.
     uBit.init();
 
-    //Instances for classes
-    //reciever r;
+    //Create instance of class
+    MorseClass* morse = new MorseClass();
 
     //Variables
     bool buttonPressed = false;
-    uint64_t runningTime, durationPressed;
+    uint64_t runningTime, durationPressed, startWaiting, waitingTime;
+    string transmissionBuffer;
+    char letter;
 
     //Main infinite loop
     while (1) {
@@ -59,19 +67,15 @@ int main()
         //DOT Output
         if ((durationPressed > 100) && (durationPressed < 400)) {
           uBit.display.printAsync(DOT_IMAGE);
-          P2.setDigitalValue(1);
-          uBit.sleep(DOT_TIME);
-          P2.setDigitalValue(0);
-          uBit.sleep(450); //Added sleep for diplaying image
+          transmissionBuffer += '.';
+          uBit.sleep(700);
           uBit.display.clear();
         }
         //DASH output
         else if ((durationPressed > 400) && (durationPressed < 900)) {
           uBit.display.printAsync(DASH_IMAGE);
-          P2.setDigitalValue(1);
-          uBit.sleep(DASH_TIME);
-          P2.setDigitalValue(0);
-          uBit.sleep(200); //Added sleep for diplaying image
+          transmissionBuffer += '-';
+          uBit.sleep(700);
           uBit.display.clear();
         }
         //NOISE
@@ -80,79 +84,36 @@ int main()
           uBit.sleep(700);
           uBit.display.clear();
         }
-
-
+        startWaiting = uBit.systemTime();
         buttonPressed = false;
       }
-    }
-/*
 
-      //Wait for PIN signal
+      //Update time since last input
+      waitingTime = runningTime - startWaiting;
 
+      //Input is finished if wait time met
+      if ((waitingTime > 1500) && (startWaiting != 0)) {
+        //Get letter associated with morse input
+        letter = morse->getLetter(transmissionBuffer);
+        //Encrypt letter with Caeser cipher
+        letter = morse->encrypt(letter);
+        //Get morse code for new encrypted letter
+        transmissionBuffer = morse->getMorse(letter);
+        //Send morse code
+        sendTransmission(transmissionBuffer);
 
+        //NEED TO GET LETTER FROM MAP, THEN CIPHER, THEN REVERSE TO MORSE AND SEND
 
-      //Get pin 2 input length
-      pressedTime = 0;
-      MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
-      while (P2.getDigitalValue == 1) {
-        if (pressedTime == 0) {
-          pressedTime = (int)uBit.systemTime();
-          uBit.display.print("1");
-        }
+        //Reset variables to allow for new transmissions
+        transmissionBuffer.clear();
+        startWaiting = 0;
       }
-      durationPressed = (int)uBit.systemTime() - pressedTime;
-      uBit.sleep(10);
+
+
 
 
     }
 
-
-    //Wait for input
-    int startTime = (int)uBit.systemTime();
-    int pressedTime = 0;
-    int durationPressed = 0;
-
-    //Get pin 2 input length
-    pressedTime = 0;
-    MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
-    while (P2.getDigitalValue == 1) {
-      if (pressedTime == 0) {
-        pressedTime = (int)uBit.systemTime();
-        uBit.display.print("1");
-      }
-    }
-    durationPressed = (int)uBit.systemTime() - pressedTime;
-    uBit.sleep(10);
-
-    //If there has been an input, add to buffer
-    if (pressedTime != 0) {
-      if (durationPressed > 1200) {
-        //Then it is noise
-      } else if (durationPressed < DOT_TIME + 20) {
-        inputBuffer += '.';
-      } else if (durationPressed < DASH_TIME + 20) {
-        inputBuffer += '-';
-      }
-      pressedTime = 0;
-      startTime = (int)uBit.systemTime();
-      uBit.display.print("2");
-    }
-
-    //If the input has ended
-    if ((inputBuffer.length() > 0) && (uBit.systemTime() - startTime > 1200)){
-      uBit.display.print("3");
-      mapPos = MORSE_MAP.find(inputBuffer);
-      if (mapPos == MORSE_MAP.end()) { //If invalid input
-          uBit.display.print("?");
-          uBit.sleep(700);
-          uBit.display.clear();
-      } else {
-          uBit.display.print(mapPos->second);
-          uBit.sleep(700);
-          uBit.display.clear();
-      }
-    }
-*/
 
     // If main exits, there may still be other fibers running or
     // registered event handlers etc.
@@ -160,4 +121,24 @@ int main()
     // scheduler. Worse case, we then
     // sit in the idle task forever, in a power efficient sleep.
     release_fiber();
+}
+
+void sendTransmission(string transmissionBuffer) {
+  //Store dots/dashes to be processed seperatley
+  int transmissionLength = transmissionBuffer.length();
+  char transmissionArray[transmissionLength + 1];
+  strcpy(transmissionArray, transmissionBuffer.c_str());
+
+  //Send morse code across wire attached to pin 1
+  for (int i = 0; i < transmissionLength; i++) {
+    if (transmissionArray[i] == '.') {
+      P1.setDigitalValue(1);
+      uBit.sleep(DOT_TIME);
+      P1.setDigitalValue(0);
+    } else if (transmissionArray[i] == '-') {
+      P1.setDigitalValue(1);
+      uBit.sleep(DASH_TIME);
+      P1.setDigitalValue(0);
+    }
+  }
 }

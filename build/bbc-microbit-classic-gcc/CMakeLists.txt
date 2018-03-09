@@ -40,14 +40,14 @@ endfunction()
 # set target-defined definitions
 set(YOTTA_BUILD_YEAR "2018") # UTC year
 set(YOTTA_BUILD_MONTH "3") # UTC month 1-12
-set(YOTTA_BUILD_DAY "8") # UTC day 1-31
-set(YOTTA_BUILD_HOUR "22") # UTC hour 0-24
-set(YOTTA_BUILD_MINUTE "15") # UTC minute 0-59
-set(YOTTA_BUILD_SECOND "44") # UTC second 0-61
-set(YOTTA_BUILD_UUID "3e5edeb7-4053-409f-916f-e7169c8d5c3d") # unique random UUID for each build
-set(YOTTA_BUILD_VCS_ID "977ea91febf463ae1b6806988dc2d0bf91aa0605") # git or mercurial hash
+set(YOTTA_BUILD_DAY "9") # UTC day 1-31
+set(YOTTA_BUILD_HOUR "2") # UTC hour 0-24
+set(YOTTA_BUILD_MINUTE "37") # UTC minute 0-59
+set(YOTTA_BUILD_SECOND "18") # UTC second 0-61
+set(YOTTA_BUILD_UUID "a398fea7-a229-4962-a8a4-047fc04a748a") # unique random UUID for each build
+set(YOTTA_BUILD_VCS_ID "bf04b62e76443c397f625bc8837336bad86c9704") # git or mercurial hash
 set(YOTTA_BUILD_VCS_CLEAN "0") # evaluates true if the version control system was clean, otherwise false
-set(YOTTA_BUILD_VCS_DESCRIPTION "977ea91") # git describe or mercurial equivalent
+set(YOTTA_BUILD_VCS_DESCRIPTION "bf04b62") # git describe or mercurial equivalent
 set(TARGET BBC_MICROBIT_CLASSIC_GCC)
 set(TARGET_LIKE_BBC_MICROBIT_CLASSIC_GCC TRUE)
 set(YOTTA_BUILD_INFO_HEADER "/home/student/IoT-Challenge2/build/bbc-microbit-classic-gcc/yotta_build_info.h")

@@ -8,10 +8,12 @@ include_directories("/home/student/IoT-Challenge2/source")
 set(YOTTA_AUTO_IOT-EXAMPLE_CPP_FILES
     "/home/student/IoT-Challenge2/source/main.cpp"
     "/home/student/IoT-Challenge2/source/reciever.cpp"
+    "/home/student/IoT-Challenge2/source/morse.cpp"
 )
 # force dependency on the config header for cpp files, which CMake otherwise wouldn't track:
 set_property(SOURCE ${YOTTA_AUTO_IOT-EXAMPLE_CPP_FILES} PROPERTY OBJECT_DEPENDS "/home/student/IoT-Challenge2/build/bbc-microbit-classic-gcc/yotta_config.h")
 set(YOTTA_AUTO_IOT-EXAMPLE_HEADER_FILES
+    "/home/student/IoT-Challenge2/source/morse.h"
     "/home/student/IoT-Challenge2/source/reciever.h"
 )
 # force dependency on the config header for header files, which CMake otherwise wouldn't track:
