@@ -55,3 +55,24 @@ char MorseClass::encrypt(char letter) {
   }
   return returnVar;
 }
+
+char MorseClass::decrypt(char letter) {
+  char returnVar = '?';
+  uint64_t iteratorPos;
+  //Loop through map to find letter position
+  for (mapItr = morseMap.begin(); mapItr != morseMap.end(); ++mapItr) {
+    if (letter == mapItr->second) {
+        //Cycle through map to find new position
+        for (int i = 0; i < ENCRYPTION_KEY; i++) {
+          --mapItr;
+          iteratorPos = std::distance(morseMap.begin(), mapItr);
+          if (iteratorPos < morseMap.size()) {
+            mapItr = morseMap.end(); //Reset map iterator to end if too small
+          }
+        }
+        returnVar = mapItr->second;
+      break;
+    }
+  }
+  return returnVar;
+}

@@ -20,6 +20,8 @@ public:
   string getMorse(char letter);
   //Encrypts passed letter using Caeser cipher method + the set Key
   char encrypt(char letter);
+  //Decrpyts passed letter using Caeser cipher method + the set Key
+  char decrypt(char letter);
 
 private:
   //Used for mapping morsecode to letters

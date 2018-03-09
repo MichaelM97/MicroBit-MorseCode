@@ -45,7 +45,7 @@ int main()
     MorseClass* morse = new MorseClass();
 
     //Variables
-    bool buttonPressed = false;
+    bool buttonPressed = false, incomingSignal = false;
     uint64_t runningTime, durationPressed, startWaiting, waitingTime;
     string transmissionBuffer;
     char letter;
@@ -56,6 +56,7 @@ int main()
       //Update system up time
       runningTime = uBit.systemTime();
 
+      /** HANDLE MORSE TRANSMISSION **/
       //Wait for button input
       while (buttonA.isPressed()) {
         buttonPressed = true;
@@ -80,7 +81,7 @@ int main()
         }
         //NOISE
         else if (durationPressed > 900) {
-          uBit.display.printAsync("?");
+          uBit.display.printAsync("!");
           uBit.sleep(700);
           uBit.display.clear();
         }
@@ -95,31 +96,73 @@ int main()
       if ((waitingTime > 1500) && (startWaiting != 0)) {
         //Get letter associated with morse input
         letter = morse->getLetter(transmissionBuffer);
-        //Encrypt letter with Caeser cipher
-        letter = morse->encrypt(letter);
-        //Get morse code for new encrypted letter
-        transmissionBuffer = morse->getMorse(letter);
-        //Send morse code
-        sendTransmission(transmissionBuffer);
-
-        //NEED TO GET LETTER FROM MAP, THEN CIPHER, THEN REVERSE TO MORSE AND SEND
-
+        if (letter != '?') { //Only if valid morse found
+          //Encrypt letter with Caeser cipher
+          letter = morse->encrypt(letter);
+          //Get morse code for new encrypted letter
+          transmissionBuffer = morse->getMorse(letter);
+          //Send morse code
+          sendTransmission(transmissionBuffer);
+        } else {
+          uBit.display.printAsync("?");
+          uBit.sleep(700);
+          uBit.display.clear();
+        }
         //Reset variables to allow for new transmissions
         transmissionBuffer.clear();
         startWaiting = 0;
       }
 
+      /** HANDLE INCOMING MORSE **/
+      //Wait for signal from Pin 1
+      while (P1.getDigitalValue() == 1) {
+        incomingSignal = true;
+        durationPressed = uBit.systemTime() - runningTime;
+      }
 
+      //Process incoming signal
+      if (incomingSignal == true) {
+        //DOT input
+        if ((durationPressed > 100) && (durationPressed < 400)) {
+          transmissionBuffer += '.';
+        }
+        //DASH input
+        else if ((durationPressed > 400) && (durationPressed < 900)) {
+          transmissionBuffer += '-';
+        }
+        //NOISE
+        else if (durationPressed > 900) {
+          uBit.display.printAsync("!");
+          uBit.sleep(700);
+          uBit.display.clear();
+        }
+        startWaiting = uBit.systemTime();
+        incomingSignal = false;
+      }
 
+      //Update time since last signal
+      waitingTime = runningTime - startWaiting;
 
+      //Incoming signal is finished if wait time met
+      if ((waitingTime > 1500) && (startWaiting != 0)) {
+        //Get letter associated with morse signal
+        letter = morse->getLetter(transmissionBuffer);
+        if (letter != '?') { //Only if valid morse found
+          //Decrypt letter with Caeser cipher
+          letter = morse->decrypt(letter);
+        }
+        //Display letter to user
+        uBit.display.printAsync(letter);
+        uBit.sleep(700);
+        uBit.display.clear();
+        //Reset variables to allow for new transmissions
+        transmissionBuffer.clear();
+        startWaiting = 0;
+      }
     }
 
-
-    // If main exits, there may still be other fibers running or
-    // registered event handlers etc.
-    // Simply release this fiber, which will mean we enter the
-    // scheduler. Worse case, we then
-    // sit in the idle task forever, in a power efficient sleep.
+    //Delete class instances and go into power efficient sleep
+    delete morse;
     release_fiber();
 }
 
