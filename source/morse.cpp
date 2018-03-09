@@ -37,19 +37,24 @@ string MorseClass::getMorse(char letter) {
 
 char MorseClass::encrypt(char letter) {
   char returnVar = '?';
-  uint64_t iteratorPos;
   //Loop through map to find letter position
   for (mapItr = morseMap.begin(); mapItr != morseMap.end(); ++mapItr) {
     if (letter == mapItr->second) {
-        //Cycle through map to find new position
-        for (int i = 0; i < ENCRYPTION_KEY; i++) {
-          ++mapItr;
-          iteratorPos = std::distance(morseMap.begin(), mapItr);
-          if (iteratorPos > morseMap.size()) {
-            mapItr = morseMap.begin(); //Reset map iterator to begining if too large
-          }
+        //Shift the letters position to the right by 3
+        switch (letter) {
+          case '8':
+            returnVar = 'A';
+            break;
+          case '9':
+            returnVar = 'B';
+            break;
+          case '0':
+            returnVar = 'C';
+            break;
+          default:
+            advance(mapItr, ENCRYPTION_KEY);
+            returnVar = mapItr->second;
         }
-        returnVar = mapItr->second;
       break;
     }
   }
@@ -58,20 +63,25 @@ char MorseClass::encrypt(char letter) {
 
 char MorseClass::decrypt(char letter) {
   char returnVar = '?';
-  uint64_t iteratorPos;
   //Loop through map to find letter position
   for (mapItr = morseMap.begin(); mapItr != morseMap.end(); ++mapItr) {
     if (letter == mapItr->second) {
-        //Cycle through map to find new position
-        for (int i = 0; i < ENCRYPTION_KEY; i++) {
-          --mapItr;
-          iteratorPos = std::distance(morseMap.begin(), mapItr);
-          if (iteratorPos < morseMap.size()) {
-            mapItr = morseMap.end(); //Reset map iterator to end if too small
-          }
-        }
-        returnVar = mapItr->second;
-      break;
+      //Shift the letters position to the left by 3
+      switch (letter) {
+        case 'A':
+          returnVar = '8';
+          break;
+        case 'B':
+          returnVar = '9';
+          break;
+        case 'C':
+          returnVar = '0';
+          break;
+        default:
+          mapItr = prev(mapItr, 3)
+          returnVar = mapItr->second;
+      }
+    break;
     }
   }
   return returnVar;

@@ -46,7 +46,7 @@ int main()
 
     //Variables
     bool buttonPressed = false, incomingSignal = false;
-    uint64_t runningTime, durationPressed, startWaiting, waitingTime;
+    uint64_t runningTime, durationPressed, waiting = 0;
     string transmissionBuffer;
     char letter;
 
@@ -60,8 +60,10 @@ int main()
       //Wait for button input
       while (buttonA.isPressed()) {
         buttonPressed = true;
-        durationPressed = uBit.systemTime() - runningTime;
       }
+
+      //Get the button input duration
+      durationPressed = uBit.systemTime() - runningTime;
 
       //Process button press
       if (buttonPressed == true) {
@@ -73,27 +75,27 @@ int main()
           uBit.display.clear();
         }
         //DASH output
-        else if ((durationPressed > 400) && (durationPressed < 900)) {
+        else if ((durationPressed > 400) && (durationPressed < 800)) {
           uBit.display.printAsync(DASH_IMAGE);
           transmissionBuffer += '-';
           uBit.sleep(700);
           uBit.display.clear();
         }
         //NOISE
-        else if (durationPressed > 900) {
+        else if (durationPressed > 800) {
           uBit.display.printAsync("!");
           uBit.sleep(700);
           uBit.display.clear();
         }
-        startWaiting = uBit.systemTime();
+        //Reset variables to allow for new inputs
         buttonPressed = false;
+        waiting = uBit.systemTime();
+        //Update system up time
+        runningTime = uBit.systemTime();
       }
 
-      //Update time since last input
-      waitingTime = runningTime - startWaiting;
-
       //Input is finished if wait time met
-      if ((waitingTime > 1500) && (startWaiting != 0)) {
+      if (((runningTime - waiting) > 2000) && (waiting != 0)) {
         //Get letter associated with morse input
         letter = morse->getLetter(transmissionBuffer);
         if (letter != '?') { //Only if valid morse found
@@ -103,6 +105,9 @@ int main()
           transmissionBuffer = morse->getMorse(letter);
           //Send morse code
           sendTransmission(transmissionBuffer);
+          uBit.display.printAsync(">");
+          uBit.sleep(700);
+          uBit.display.clear();
         } else {
           uBit.display.printAsync("?");
           uBit.sleep(700);
@@ -110,15 +115,17 @@ int main()
         }
         //Reset variables to allow for new transmissions
         transmissionBuffer.clear();
-        startWaiting = 0;
+        waiting = 0;
       }
 
       /** HANDLE INCOMING MORSE **/
       //Wait for signal from Pin 1
       while (P1.getDigitalValue() == 1) {
         incomingSignal = true;
-        durationPressed = uBit.systemTime() - runningTime;
       }
+
+      //Get the incoming signal duration
+      durationPressed = uBit.systemTime() - runningTime;
 
       //Process incoming signal
       if (incomingSignal == true) {
@@ -127,24 +134,24 @@ int main()
           transmissionBuffer += '.';
         }
         //DASH input
-        else if ((durationPressed > 400) && (durationPressed < 900)) {
+        else if ((durationPressed > 400) && (durationPressed < 800)) {
           transmissionBuffer += '-';
         }
         //NOISE
-        else if (durationPressed > 900) {
+        else if (durationPressed > 800) {
           uBit.display.printAsync("!");
           uBit.sleep(700);
           uBit.display.clear();
         }
-        startWaiting = uBit.systemTime();
+        //Reset variables to allow for new incoming signals
         incomingSignal = false;
+        waiting = uBit.systemTime();
+        //Update system up time
+        runningTime = uBit.systemTime();
       }
 
-      //Update time since last signal
-      waitingTime = runningTime - startWaiting;
-
       //Incoming signal is finished if wait time met
-      if ((waitingTime > 1500) && (startWaiting != 0)) {
+      if (((runningTime - waiting) > 2000) && (waiting != 0)) {
         //Get letter associated with morse signal
         letter = morse->getLetter(transmissionBuffer);
         if (letter != '?') { //Only if valid morse found
@@ -157,8 +164,9 @@ int main()
         uBit.display.clear();
         //Reset variables to allow for new transmissions
         transmissionBuffer.clear();
-        startWaiting = 0;
+        waiting = 0;
       }
+
     }
 
     //Delete class instances and go into power efficient sleep
