@@ -9,7 +9,6 @@
 #include "MicroBit.h"
 #include "morse.h"
 #include <stdlib.h>
-#include <time.h>
 #include <stdio.h>
 #include <string>
 
@@ -34,7 +33,6 @@ MicroBitImage DASH_IMAGE("0,0,0,0,0\n0,0,0,0,0\n0,255,255,255,0\n0,0,0,0,0\n0,0,
 MicroBitButton buttonA(MICROBIT_PIN_BUTTON_A, MICROBIT_ID_BUTTON_A);
 
 //Pin events
-//MicroBitPin P0(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ALL);
 MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
 
 int main()
