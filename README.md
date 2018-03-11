@@ -1,8 +1,4 @@
-# IoT - Challenge 2
-
-## Contributers
-- Michael McCormick (15012271)
-- Jacob Davies (15012401)
+# BBC MicroBit - Morse Code Protocol
 
 ## Protocol Description
 This basic protocol takes a Morse Code input from one BBC MicroBit, encrypts
@@ -17,8 +13,8 @@ the other MicroBit. Further details on this process can be seen below.
 ## Building and Loading the protocol
 ### 1. Clone this repository onto to your computer, and change directory into the folder:
 ```
-git clone https://gitlab.uwe.ac.uk/m2-mccormick/IoT-Challenge2.git
-cd [YOUR_FILE_PATH]/IoT-Challenge2
+git clone https://github.com/MichaelM97/MicroBit-MorseCode.git
+cd [YOUR_FILE_PATH]/MicroBit-MorseCode
 ```
 ### 2. Set the target for yotta, and build the .hex file
 ```
@@ -62,4 +58,4 @@ the left in the map, in order to find the correct letter the user originally
 intended on displaying.
 
 ## State Diagram
-![alt text](/State Diagram.png)
+![alt text](/State Diagram.png "Simple state diagram of the protocol")
