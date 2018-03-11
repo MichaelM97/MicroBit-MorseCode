@@ -56,6 +56,3 @@ original morse sequence inputted by the user. Once the other MicroBit has finish
 recieving the transmission, it will decrypt the message by shifting 3 places to
 the left in the map, in order to find the correct letter the user originally
 intended on displaying.
-
-## State Diagram
-![alt text](./State Diagram.png "Simple state diagram of the protocol")
